@@ -39,6 +39,8 @@ interface Ativo {
   valor: number;
   depr_acum: number;
   saldo_contabil: number;
+  numero_bem: string;
+  numero_incorporacao: string;
   observacao: string;
   created_at: string;
   updated_at: string;
@@ -83,6 +85,14 @@ const COLUMN_MAP: Record<string, string> = {
   'saldo_contabil': 'saldo_contabil',
   'saldo contábil': 'saldo_contabil',
   'saldo_contábil': 'saldo_contabil',
+  'numero_bem': 'numero_bem',
+  'numero do bem': 'numero_bem',
+  'número do bem': 'numero_bem',
+  'nº bem': 'numero_bem',
+  'numero_incorporacao': 'numero_incorporacao',
+  'numero da incorporação': 'numero_incorporacao',
+  'número da incorporação': 'numero_incorporacao',
+  'nº incorporação': 'numero_incorporacao',
   'observacao': 'observacao',
   'observação': 'observacao',
   'obs': 'observacao',
@@ -110,7 +120,7 @@ const parseNumericValue = (val: any): number => {
   return isNaN(num) ? 0 : num;
 };
 
-const dbFields = ['placa', 'numero_loja', 'descricao', 'status', 'categoria', 'localizacao', 'data_aquisicao', 'valor', 'depr_acum', 'saldo_contabil', 'observacao'];
+const dbFields = ['placa', 'numero_loja', 'numero_bem', 'numero_incorporacao', 'descricao', 'status', 'categoria', 'localizacao', 'data_aquisicao', 'valor', 'depr_acum', 'saldo_contabil', 'observacao'];
 const fieldLabels: Record<string, string> = {
   placa: 'Placa',
   numero_loja: 'Número da Loja',
@@ -122,6 +132,8 @@ const fieldLabels: Record<string, string> = {
   valor: 'Valor',
   depr_acum: 'Depr. Acum',
   saldo_contabil: 'Saldo Contábil',
+  numero_bem: 'Número do Bem',
+  numero_incorporacao: 'Incorporação',
   observacao: 'Observação',
 };
 
@@ -153,6 +165,8 @@ function App() {
   const [filtroPlaca, setFiltroPlaca] = useState('');
   const [filtroLoja, setFiltroLoja] = useState('');
   const [filtroDescricao, setFiltroDescricao] = useState('');
+  const [filtroNumeroBem, setFiltroNumeroBem] = useState('');
+  const [filtroNumeroIncorporacao, setFiltroNumeroIncorporacao] = useState('');
 
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -177,9 +191,11 @@ function App() {
     setError(null);
     try {
       let query = supabase.from('ativos').select('*').order('created_at', { ascending: false });
-      if (filtroPlaca.trim()) query = query.ilike('placa', `%${filtroPlaca.trim()}%`);
-      if (filtroLoja.trim()) query = query.ilike('numero_loja', `%${filtroLoja.trim()}%`);
+      if (filtroPlaca.trim()) query = query.eq('placa', filtroPlaca.trim());
+      if (filtroLoja.trim()) query = query.eq('numero_loja', filtroLoja.trim());
       if (filtroDescricao.trim()) query = query.ilike('descricao', `%${filtroDescricao.trim()}%`);
+      if (filtroNumeroBem.trim()) query = query.eq('numero_bem', filtroNumeroBem.trim());
+      if (filtroNumeroIncorporacao.trim()) query = query.eq('numero_incorporacao', filtroNumeroIncorporacao.trim());
       const { data, error: fetchError } = await query;
       if (fetchError) throw fetchError;
       setAtivos(data || []);
@@ -188,7 +204,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [filtroPlaca, filtroLoja, filtroDescricao]);
+  }, [filtroPlaca, filtroLoja, filtroDescricao, filtroNumeroBem, filtroNumeroIncorporacao]);
 
   useEffect(() => { fetchAtivos(); }, [fetchAtivos]);
   useEffect(() => {
@@ -360,6 +376,8 @@ function App() {
         valor: parseNumericValue(row.valor),
         depr_acum: parseNumericValue(row.depr_acum),
         saldo_contabil: parseNumericValue(row.saldo_contabil),
+        numero_bem: String(row.numero_bem || ''),
+        numero_incorporacao: String(row.numero_incorporacao || ''),
         observacao: String(row.observacao || ''),
       }));
       const { error: insertError } = await supabase.from('ativos').insert(batch);
@@ -619,7 +637,7 @@ function App() {
                     {dbFields.map(field => (
                       <div key={field}>
                         <label className="text-xs font-medium text-slate-700 mb-1.5 block capitalize">
-                          {field === 'numero_loja' ? 'Número da loja' : field === 'data_aquisicao' ? 'Data aquisição' : field === 'depr_acum' ? 'Depr. Acum' : field === 'saldo_contabil' ? 'Saldo Contábil' : field}
+                          {fieldLabels[field] || field}
                         </label>
                         <select
                           value={columnMapping[field] || ''}
@@ -657,6 +675,8 @@ function App() {
                     {[
                       ['placa', 'Placa do ativo'],
                       ['numero_loja / loja', 'Numero da loja'],
+                      ['numero_bem', 'Número do bem'],
+                      ['numero_incorporacao', 'Número da incorporação'],
                       ['descricao / item', 'Descricao do item'],
                       ['status', 'Status (ativo/inativo)'],
                       ['categoria', 'Categoria'],
@@ -921,11 +941,11 @@ function App() {
               <div className="flex items-center gap-2 text-sm font-medium text-slate-700">
                 <Filter className="w-4 h-4 text-emerald-600" />Filtros de Busca
               </div>
-              <button onClick={() => { setFiltroPlaca(''); setFiltroLoja(''); setFiltroDescricao(''); }} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Limpar filtros</button>
+                <button onClick={() => { setFiltroPlaca(''); setFiltroLoja(''); setFiltroDescricao(''); setFiltroNumeroBem(''); setFiltroNumeroIncorporacao(''); }} className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Limpar filtros</button>
             </div>
           </div>
           <div className="p-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div>
                 <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5"><Package className="w-3.5 h-3.5" />Numero da Placa</label>
                 <div className="relative">
@@ -941,6 +961,20 @@ function App() {
                 </div>
               </div>
               <div>
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5"><FileText className="w-3.5 h-3.5" />Número do Bem</label>
+                  <div className="relative">
+                    <input type="text" value={filtroNumeroBem} onChange={(e) => setFiltroNumeroBem(e.target.value)} placeholder="Buscar bem..." className="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+                    {filtroNumeroBem && <button onClick={() => setFiltroNumeroBem('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>}
+                  </div>
+                </div>
+                <div>
+                  <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5"><FileText className="w-3.5 h-3.5" />Incorporação</label>
+                  <div className="relative">
+                    <input type="text" value={filtroNumeroIncorporacao} onChange={(e) => setFiltroNumeroIncorporacao(e.target.value)} placeholder="Buscar inc..." className="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
+                    {filtroNumeroIncorporacao && <button onClick={() => setFiltroNumeroIncorporacao('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X className="w-4 h-4" /></button>}
+                  </div>
+                </div>
+                <div className="lg:col-span-1">
                 <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5"><FileText className="w-3.5 h-3.5" />Descricao do Item</label>
                 <div className="relative">
                   <input type="text" value={filtroDescricao} onChange={(e) => setFiltroDescricao(e.target.value)} placeholder="Buscar por descricao..." className="w-full pl-3 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />

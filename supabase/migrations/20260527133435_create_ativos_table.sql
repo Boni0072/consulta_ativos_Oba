@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS ativos (
   valor numeric DEFAULT 0,
   depr_acum numeric DEFAULT 0,
   saldo_contabil numeric DEFAULT 0,
+  numero_bem text DEFAULT '',
+  numero_incorporacao text DEFAULT '',
   observacao text DEFAULT '',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
@@ -95,6 +97,8 @@ CREATE POLICY "Anyone can delete ativos"
 
 CREATE INDEX IF NOT EXISTS idx_ativos_placa ON ativos (placa);
 CREATE INDEX IF NOT EXISTS idx_ativos_numero_loja ON ativos (numero_loja);
+CREATE INDEX IF NOT EXISTS idx_ativos_numero_bem ON ativos (numero_bem);
+CREATE INDEX IF NOT EXISTS idx_ativos_numero_incorporacao ON ativos (numero_incorporacao);
 
 -- Insert sample data
 INSERT INTO ativos (placa, numero_loja, descricao, status, categoria, localizacao, data_aquisicao, valor, observacao) VALUES
