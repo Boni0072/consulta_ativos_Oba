@@ -1040,7 +1040,6 @@ function App() {
                       <td className="px-2 py-3 text-right">
                         <div className="inline-flex items-center gap-1">
                           <button onClick={(e) => { e.stopPropagation(); openEditModal(ativo); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors" title="Editar"><Edit3 className="w-4 h-4" /></button>
-                          <button onClick={(e) => { e.stopPropagation(); setDeletingId(ativo.id); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" title="Excluir"><Trash2 className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
