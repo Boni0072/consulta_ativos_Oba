@@ -110,6 +110,21 @@ const parseNumericValue = (val: any): number => {
   return isNaN(num) ? 0 : num;
 };
 
+const dbFields = ['placa', 'numero_loja', 'descricao', 'status', 'categoria', 'localizacao', 'data_aquisicao', 'valor', 'depr_acum', 'saldo_contabil', 'observacao'];
+const fieldLabels: Record<string, string> = {
+  placa: 'Placa',
+  numero_loja: 'Número da Loja',
+  descricao: 'Descrição',
+  status: 'Status',
+  categoria: 'Categoria',
+  localizacao: 'Localização',
+  data_aquisicao: 'Data Aquisição',
+  valor: 'Valor',
+  depr_acum: 'Depr. Acum',
+  saldo_contabil: 'Saldo Contábil',
+  observacao: 'Observação',
+};
+
 function App() {
   const [page, setPage] = useState<Page>('main');
   const [isAdminAuth, setIsAdminAuth] = useState(false);
@@ -126,23 +141,8 @@ function App() {
   const [importResult, setImportResult] = useState<{ success: number; errors: number } | null>(null);
   const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
   const [showMappingStep, setShowMappingStep] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(['placa', 'numero_loja', 'descricao', 'localizacao', 'valor', 'depr_acum']));
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set(dbFields));
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const dbFields = ['placa', 'numero_loja', 'descricao', 'status', 'categoria', 'localizacao', 'data_aquisicao', 'valor', 'depr_acum', 'saldo_contabil', 'observacao'];
-  const fieldLabels: Record<string, string> = {
-    placa: 'Placa',
-    numero_loja: 'Número da Loja',
-    descricao: 'Descrição',
-    status: 'Status',
-    categoria: 'Categoria',
-    localizacao: 'Localização',
-    data_aquisicao: 'Data Aquisição',
-    valor: 'Valor',
-    depr_acum: 'Depr. Acum',
-    saldo_contabil: 'Saldo Contábil',
-    observacao: 'Observação',
-  };
 
   // Main page states
   const [ativos, setAtivos] = useState<Ativo[]>([]);
@@ -789,38 +789,38 @@ function App() {
                   <thead className="sticky top-0 bg-slate-50">
                     <tr>
                       <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">#</th>
-                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap w-10">Placa</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap w-8">Placa</th>
                       <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap w-10">Loja</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Descrição</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Status</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Categoria</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Localização</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Aquisição</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Valor</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Depr. Acum</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Saldo Contábil</th>
-                      <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Obs</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Descrição</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Status</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Categoria</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Localização</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Aquisição</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Valor</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Depr. Acum</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Saldo Contábil</th>
+                      <th className="px-2 py-2.5 text-left text-xs font-semibold text-slate-500 whitespace-nowrap">Obs</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {excelData.slice(0, 100).map((row, i) => (
                       <tr key={i} className="hover:bg-slate-50/50">
                         <td className="px-2 py-2 text-slate-400 text-xs">{i + 1}</td>
-                        <td className="px-2 py-2 font-mono text-slate-700 whitespace-nowrap w-10">{String(row.placa || '-')}</td>
+                        <td className="px-2 py-2 font-mono text-slate-700 whitespace-nowrap w-8">{String(row.placa || '-')}</td>
                         <td className="px-2 py-2 text-slate-700 whitespace-nowrap w-10">{String(row.numero_loja || '-')}</td>
-                        <td className="px-4 py-2 text-slate-700 max-w-2xl truncate">{String(row.descricao || '-')}</td>
-                        <td className="px-4 py-2">
+                        <td className="px-2 py-2 text-slate-700 max-w-md truncate">{String(row.descricao || '-')}</td>
+                        <td className="px-2 py-2">
                           <span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border whitespace-nowrap ${statusColors[String(row.status || 'ativo')] || 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                             {String(row.status || 'ativo')}
                           </span>
                         </td>
-                        <td className="px-4 py-2 text-slate-700 whitespace-nowrap">{String(row.categoria || '-')}</td>
-                        <td className="px-4 py-2 text-slate-700 whitespace-nowrap">{String(row.localizacao || '-')}</td>
-                        <td className="px-4 py-2 text-slate-700 whitespace-nowrap">{row.data_aquisicao ? formatDate(String(row.data_aquisicao)) : '-'}</td>
-                        <td className="px-4 py-2 font-mono text-slate-700 whitespace-nowrap">{row.valor ? formatCurrency(parseNumericValue(row.valor)) : '-'}</td>
-                        <td className="px-4 py-2 font-mono text-slate-700 whitespace-nowrap">{row.depr_acum ? formatCurrency(parseNumericValue(row.depr_acum)) : '-'}</td>
-                        <td className="px-4 py-2 font-mono text-slate-700 whitespace-nowrap">{row.saldo_contabil ? formatCurrency(parseNumericValue(row.saldo_contabil)) : '-'}</td>
-                        <td className="px-4 py-2 text-slate-700 max-w-xs truncate">{String(row.observacao || '-')}</td>
+                        <td className="px-2 py-2 text-slate-700 whitespace-nowrap">{String(row.categoria || '-')}</td>
+                        <td className="px-2 py-2 text-slate-700 whitespace-nowrap">{String(row.localizacao || '-')}</td>
+                        <td className="px-2 py-2 text-slate-700 whitespace-nowrap">{row.data_aquisicao ? formatDate(String(row.data_aquisicao)) : '-'}</td>
+                        <td className="px-2 py-2 font-mono text-slate-700 whitespace-nowrap">{row.valor ? formatCurrency(parseNumericValue(row.valor)) : '-'}</td>
+                        <td className="px-2 py-2 font-mono text-slate-700 whitespace-nowrap">{row.depr_acum ? formatCurrency(parseNumericValue(row.depr_acum)) : '-'}</td>
+                        <td className="px-2 py-2 font-mono text-slate-700 whitespace-nowrap">{row.saldo_contabil ? formatCurrency(parseNumericValue(row.saldo_contabil)) : '-'}</td>
+                        <td className="px-2 py-2 text-slate-700 max-w-xs truncate">{String(row.observacao || '-')}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -977,7 +977,7 @@ function App() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="bg-slate-50/50">
-                    {visibleColumns.has('placa') && <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700 whitespace-nowrap w-10" onClick={() => handleSort('placa')}><div className="flex items-center gap-1">Placa <SortIcon field="placa" /></div></th>}
+                    {visibleColumns.has('placa') && <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700 whitespace-nowrap w-8" onClick={() => handleSort('placa')}><div className="flex items-center gap-1">Placa <SortIcon field="placa" /></div></th>}
                     {visibleColumns.has('numero_loja') && <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700 whitespace-nowrap w-10" onClick={() => handleSort('numero_loja')}><div className="flex items-center gap-1">Loja <SortIcon field="numero_loja" /></div></th>}
                     {visibleColumns.has('descricao') && <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700 whitespace-nowrap" onClick={() => handleSort('descricao')}><div className="flex items-center gap-1">Descrição <SortIcon field="descricao" /></div></th>}
                     {visibleColumns.has('status') && <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700 whitespace-nowrap" onClick={() => handleSort('status')}><div className="flex items-center gap-1">Status <SortIcon field="status" /></div></th>}
@@ -994,9 +994,9 @@ function App() {
                 <tbody className="divide-y divide-slate-100">
                   {sortedAtivos.map((ativo) => (
                     <tr key={ativo.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => setSelectedAtivo(ativo)}>
-                      {visibleColumns.has('placa') && <td className="px-2 py-3 whitespace-nowrap w-10"><span className="font-mono font-medium text-slate-800">{ativo.placa}</span></td>}
+                      {visibleColumns.has('placa') && <td className="px-2 py-3 whitespace-nowrap w-8"><span className="font-mono font-medium text-slate-800">{ativo.placa}</span></td>}
                       {visibleColumns.has('numero_loja') && <td className="px-2 py-3 whitespace-nowrap w-10"><span className="inline-flex items-center gap-1 text-slate-700"><Building2 className="w-3.5 h-3.5 text-slate-400" />{ativo.numero_loja}</span></td>}
-                      {visibleColumns.has('descricao') && <td className="px-2 py-3 max-w-lg"><p className="text-slate-700 truncate" title={ativo.descricao}>{ativo.descricao}</p>{ativo.observacao && <p className="text-[10px] text-slate-400 truncate mt-0.5" title={ativo.observacao}>{ativo.observacao}</p>}</td>}
+                      {visibleColumns.has('descricao') && <td className="px-2 py-3 max-w-md"><p className="text-slate-700 truncate" title={ativo.descricao}>{ativo.descricao}</p>{ativo.observacao && <p className="text-[10px] text-slate-400 truncate mt-0.5" title={ativo.observacao}>{ativo.observacao}</p>}</td>}
                       {visibleColumns.has('status') && <td className="px-2 py-3 whitespace-nowrap"><span className={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full border ${statusColors[ativo.status] || 'bg-slate-50 text-slate-600 border-slate-200'}`}>{ativo.status}</span></td>}
                       {visibleColumns.has('categoria') && <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{ativo.categoria || '-'}</td>}
                       {visibleColumns.has('localizacao') && <td className="px-2 py-3 text-slate-600 whitespace-nowrap">{ativo.localizacao || '-'}</td>}
@@ -1004,7 +1004,7 @@ function App() {
                       {visibleColumns.has('depr_acum') && <td className="px-2 py-3 font-mono text-slate-700 whitespace-nowrap">{formatCurrency(ativo.depr_acum)}</td>}
                       {visibleColumns.has('saldo_contabil') && <td className="px-2 py-3 font-mono text-slate-700 whitespace-nowrap">{formatCurrency(ativo.saldo_contabil)}</td>}
                       {visibleColumns.has('data_aquisicao') && <td className="px-2 py-3 text-slate-500 whitespace-nowrap">{formatDate(ativo.data_aquisicao)}</td>}
-                      {visibleColumns.has('observacao') && <td className="px-2 py-3 text-slate-600">{ativo.observacao || '-'}</td>}
+                      {visibleColumns.has('observacao') && <td className="px-2 py-3 text-slate-600 max-w-xs truncate">{ativo.observacao || '-'}</td>}
                       <td className="px-2 py-3 text-right">
                         <div className="inline-flex items-center gap-1">
                           <button onClick={(e) => { e.stopPropagation(); openEditModal(ativo); }} className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors" title="Editar"><Edit3 className="w-4 h-4" /></button>
