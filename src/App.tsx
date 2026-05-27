@@ -882,9 +882,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm">
-                <Package className="w-5 h-5 text-white" />
-              </div>
+              <img src="inv.png" alt="Logo" className="w-10 h-10 object-contain" />
               <div>
                 <h1 className="text-lg font-semibold text-slate-900 leading-tight">Controle de Ativos</h1>
                 <p className="text-xs text-slate-500">Gestao de patrimonio e equipamentos</p>
@@ -1029,21 +1027,21 @@ function App() {
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Placa *</label><input type="text" value={newAtivo.placa} onChange={(e) => setNewAtivo({ ...newAtivo, placa: e.target.value })} placeholder="ABC-1234" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Loja *</label><input type="text" value={newAtivo.numero_loja} onChange={(e) => setNewAtivo({ ...newAtivo, numero_loja: e.target.value })} placeholder="LOJA-01" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
               </div>
               <div><label className="block text-xs font-medium text-slate-500 mb-1">Descricao *</label><input type="text" value={newAtivo.descricao} onChange={(e) => setNewAtivo({ ...newAtivo, descricao: e.target.value })} placeholder="Descricao do ativo" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Status</label><select value={newAtivo.status} onChange={(e) => setNewAtivo({ ...newAtivo, status: e.target.value })} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"><option value="ativo">Ativo</option><option value="inativo">Inativo</option><option value="manutencao">Manutencao</option></select></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Categoria</label><input type="text" value={newAtivo.categoria} onChange={(e) => setNewAtivo({ ...newAtivo, categoria: e.target.value })} placeholder="Informatica" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Localizacao</label><input type="text" value={newAtivo.localizacao} onChange={(e) => setNewAtivo({ ...newAtivo, localizacao: e.target.value })} placeholder="Sala 101" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Data Aquisicao</label><input type="date" value={newAtivo.data_aquisicao} onChange={(e) => setNewAtivo({ ...newAtivo, data_aquisicao: e.target.value })} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
               </div>
               <div><label className="block text-xs font-medium text-slate-500 mb-1">Valor (R$)</label><input type="number" step="0.01" value={newAtivo.valor} onChange={(e) => setNewAtivo({ ...newAtivo, valor: e.target.value })} placeholder="0.00" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Depr. Acum (R$)</label><input type="number" step="0.01" value={newAtivo.depr_acum} onChange={(e) => setNewAtivo({ ...newAtivo, depr_acum: e.target.value })} placeholder="0.00" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Saldo Contabil (R$)</label><input type="number" step="0.01" value={newAtivo.saldo_contabil} onChange={(e) => setNewAtivo({ ...newAtivo, saldo_contabil: e.target.value })} placeholder="0.00" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
               </div>
@@ -1066,21 +1064,21 @@ function App() {
               <button onClick={() => setEditingAtivo(null)} className="text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Placa</label><input type="text" value={editForm.placa} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Loja</label><input type="text" value={editForm.numero_loja} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
               </div>
               <div><label className="block text-xs font-medium text-slate-500 mb-1">Descrição</label><input type="text" value={editForm.descricao} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Status</label><select value={editForm.status} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed appearance-none"><option value="ativo">Ativo</option><option value="inativo">Inativo</option><option value="manutencao">Manutenção</option></select></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Categoria</label><input type="text" value={editForm.categoria} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Localização</label><input type="text" value={editForm.localizacao} onChange={(e) => setEditForm({ ...editForm, localizacao: e.target.value })} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Data Aquisição</label><input type="date" value={editForm.data_aquisicao} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
               </div>
               <div><label className="block text-xs font-medium text-slate-500 mb-1">Valor (R$)</label><input type="number" value={editForm.valor} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Depr. Acum (R$)</label><input type="number" value={editForm.depr_acum} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
                 <div><label className="block text-xs font-medium text-slate-500 mb-1">Saldo Contábil (R$)</label><input type="number" value={editForm.saldo_contabil} disabled className="w-full px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm cursor-not-allowed" /></div>
               </div>
