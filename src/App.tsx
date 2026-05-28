@@ -178,6 +178,7 @@ function App() {
   const [filtroDescricao, setFiltroDescricao] = useState('');
   const [filtroNumeroBem, setFiltroNumeroBem] = useState('');
   const [filtroNumeroIncorporacao, setFiltroNumeroIncorporacao] = useState('');
+  const [displayLimit, setDisplayLimit] = useState(10); // Novo estado para o limite de exibição
 
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -202,6 +203,7 @@ function App() {
   const fetchAtivos = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setDisplayLimit(10); // Reseta o limite ao buscar ou filtrar
     try {
       const ativosRef = collection(db, 'ativos');
       const q = query(ativosRef, orderBy('created_at', 'desc'));
@@ -247,6 +249,8 @@ function App() {
     if (sortField === 'valor' || sortField === 'depr_acum' || sortField === 'saldo_contabil') return dir * ((a[sortField as keyof Ativo] as number ?? 0) - (b[sortField as keyof Ativo] as number ?? 0));
     return dir * String(aVal).localeCompare(String(bVal), 'pt-BR');
   });
+
+  const displayedAtivos = sortedAtivos.slice(0, displayLimit);
 
   const handleAddAtivo = async () => {
     try {
@@ -1065,7 +1069,7 @@ function App() {
           {loading ? (
             <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 text-emerald-600 animate-spin" /><span className="ml-2 text-sm text-slate-500">Carregando ativos...</span></div>
           ) : sortedAtivos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+            <div className="flex flex-col items-center justify-center py-16 text-slate-400 min-h-[200px]">
               <Package className="w-12 h-12 mb-3 text-slate-300" />
               <p className="text-sm font-medium">Nenhum ativo encontrado</p>
               <p className="text-xs mt-1">Tente ajustar os filtros ou adicione um novo ativo</p>
@@ -1089,8 +1093,8 @@ function App() {
                     <th className="px-2 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">Ações</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {sortedAtivos.map((ativo) => (
+                <tbody className="divide-y divide-slate-100 min-h-[200px]">
+                  {displayedAtivos.map((ativo) => (
                     <tr key={ativo.id} className="hover:bg-slate-50/50 transition-colors cursor-pointer" onClick={() => setSelectedAtivo(ativo)}>
                       {visibleColumns.has('placa') && <td className="px-2 py-3 whitespace-nowrap w-8"><span className="font-mono font-medium text-slate-800">{ativo.placa}</span></td>}
                       {visibleColumns.has('numero_loja') && <td className="px-2 py-3 whitespace-nowrap w-10"><span className="inline-flex items-center gap-1 text-slate-700"><Building2 className="w-3.5 h-3.5 text-slate-400" />{ativo.numero_loja}</span></td>}
@@ -1112,6 +1116,27 @@ function App() {
                   ))}
                 </tbody>
               </table>
+              {sortedAtivos.length > displayLimit && (
+                <div className="px-5 py-4 border-t border-slate-100 flex justify-center gap-3">
+                  <button
+                    onClick={() => setDisplayLimit(prev => prev + 10)}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors"
+                  >
+                    Carregar mais
+                  </button>
+                  <button
+                    onClick={() => setDisplayLimit(sortedAtivos.length)}
+                    className="px-4 py-2 text-sm font-medium text-white bg-slate-600 rounded-lg hover:bg-slate-700 transition-colors shadow-sm"
+                  >
+                    Carregar tudo
+                  </button>
+                </div>
+              )}
+              {sortedAtivos.length > 0 && displayLimit > sortedAtivos.length && (
+                <div className="px-5 py-4 border-t border-slate-100 text-center text-sm text-slate-500">
+                  Todos os {sortedAtivos.length} ativos carregados.
+                </div>
+              )}
             </div>
           )}
         </div>
