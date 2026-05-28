@@ -1,5 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from './lib/supabase';
+import { db } from './lib/firebase';
+import { 
+  collection, 
+  query, 
+  getDocs, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  writeBatch, 
+  orderBy 
+} from 'firebase/firestore';
 import * as XLSX from 'xlsx';
 import {
   X,
@@ -46,7 +57,7 @@ interface Ativo {
   updated_at: string;
 }
 
-type SortField = 'placa' | 'numero_loja' | 'descricao' | 'status' | 'categoria' | 'valor' | 'depr_acum' | 'saldo_contabil' | 'data_aquisicao';
+type SortField = 'placa' | 'numero_loja' | 'descricao' | 'status' | 'categoria' | 'valor' | 'depr_acum' | 'saldo_contabil' | 'data_aquisicao' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 type Page = 'main' | 'admin';
 
@@ -174,14 +185,16 @@ function App() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newAtivo, setNewAtivo] = useState({
     placa: '', numero_loja: '', descricao: '', status: 'ativo',
-    categoria: '', localizacao: '', data_aquisicao: '', valor: '', observacao: '',
+    categoria: '', localizacao: '', data_aquisicao: '', valor: '',
+    depr_acum: '', saldo_contabil: '', numero_bem: '', numero_incorporacao: '', observacao: '',
   });
 
   const [selectedAtivo, setSelectedAtivo] = useState<Ativo | null>(null);
   const [editingAtivo, setEditingAtivo] = useState<Ativo | null>(null);
   const [editForm, setEditForm] = useState({
     placa: '', numero_loja: '', descricao: '', status: 'ativo',
-    categoria: '', localizacao: '', data_aquisicao: '', valor: '', depr_acum: '', saldo_contabil: '', observacao: '',
+    categoria: '', localizacao: '', data_aquisicao: '', valor: '', depr_acum: '', saldo_contabil: '',
+    numero_bem: '', numero_incorporacao: '', observacao: '',
   });
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -190,15 +203,26 @@ function App() {
     setLoading(true);
     setError(null);
     try {
-      let query = supabase.from('ativos').select('*').order('created_at', { ascending: false });
-      if (filtroPlaca.trim()) query = query.eq('placa', filtroPlaca.trim());
-      if (filtroLoja.trim()) query = query.eq('numero_loja', filtroLoja.trim());
-      if (filtroDescricao.trim()) query = query.ilike('descricao', `%${filtroDescricao.trim()}%`);
-      if (filtroNumeroBem.trim()) query = query.eq('numero_bem', filtroNumeroBem.trim());
-      if (filtroNumeroIncorporacao.trim()) query = query.eq('numero_incorporacao', filtroNumeroIncorporacao.trim());
-      const { data, error: fetchError } = await query;
-      if (fetchError) throw fetchError;
-      setAtivos(data || []);
+      const ativosRef = collection(db, 'ativos');
+      const q = query(ativosRef, orderBy('created_at', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      const allAtivos = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Ativo[];
+
+      // Filtra em memória para suportar busca parcial case-insensitive (substituindo ilike)
+      const filtered = allAtivos.filter(ativo => {
+        const matchPlaca = !filtroPlaca.trim() || (ativo.placa || '').includes(filtroPlaca.trim());
+        const matchLoja = !filtroLoja.trim() || ativo.numero_loja === filtroLoja.trim();
+        const matchDesc = !filtroDescricao.trim() || (ativo.descricao || '').toLowerCase().includes(filtroDescricao.trim().toLowerCase());
+        const matchBem = !filtroNumeroBem.trim() || (ativo.numero_bem || '').includes(filtroNumeroBem.trim());
+        const matchInc = !filtroNumeroIncorporacao.trim() || (ativo.numero_incorporacao || '').includes(filtroNumeroIncorporacao.trim());
+        return matchPlaca && matchLoja && matchDesc && matchBem && matchInc;
+      });
+
+      setAtivos(filtered);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar ativos');
     } finally {
@@ -226,18 +250,25 @@ function App() {
 
   const handleAddAtivo = async () => {
     try {
-      const { error: insertError } = await supabase.from('ativos').insert({
-        placa: newAtivo.placa, numero_loja: newAtivo.numero_loja, descricao: newAtivo.descricao,
-        status: newAtivo.status, categoria: newAtivo.categoria, localizacao: newAtivo.localizacao,
+      await addDoc(collection(db, 'ativos'), {
+        placa: newAtivo.placa, 
+        numero_loja: newAtivo.numero_loja, 
+        descricao: newAtivo.descricao,
+        status: newAtivo.status, 
+        categoria: newAtivo.categoria, 
+        localizacao: newAtivo.localizacao,
         data_aquisicao: newAtivo.data_aquisicao || null,
         valor: parseNumericValue(newAtivo.valor),
         depr_acum: parseNumericValue(newAtivo.depr_acum),
         saldo_contabil: parseNumericValue(newAtivo.saldo_contabil),
+        numero_bem: newAtivo.numero_bem,
+        numero_incorporacao: newAtivo.numero_incorporacao,
         observacao: newAtivo.observacao,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
-      if (insertError) throw insertError;
       setShowAddModal(false);
-      setNewAtivo({ placa: '', numero_loja: '', descricao: '', status: 'ativo', categoria: '', localizacao: '', data_aquisicao: '', valor: '', depr_acum: '', saldo_contabil: '', observacao: '' });
+      setNewAtivo({ placa: '', numero_loja: '', descricao: '', status: 'ativo', categoria: '', localizacao: '', data_aquisicao: '', valor: '', depr_acum: '', saldo_contabil: '', numero_bem: '', numero_incorporacao: '', observacao: '' });
       setSuccessMessage('Ativo adicionado com sucesso!');
       fetchAtivos();
     } catch (err) { setError(err instanceof Error ? err.message : 'Erro ao adicionar ativo'); }
@@ -246,16 +277,22 @@ function App() {
   const handleEditAtivo = async () => {
     if (!editingAtivo) return;
     try {
-      const { error: updateError } = await supabase.from('ativos').update({
-        placa: editForm.placa, numero_loja: editForm.numero_loja, descricao: editForm.descricao,
-        status: editForm.status, categoria: editForm.categoria, localizacao: editForm.localizacao,
+      await updateDoc(doc(db, 'ativos', editingAtivo.id), {
+        placa: editForm.placa, 
+        numero_loja: editForm.numero_loja, 
+        descricao: editForm.descricao,
+        status: editForm.status, 
+        categoria: editForm.categoria, 
+        localizacao: editForm.localizacao,
         data_aquisicao: editForm.data_aquisicao || null,
         valor: parseNumericValue(editForm.valor),
         depr_acum: parseNumericValue(editForm.depr_acum),
         saldo_contabil: parseNumericValue(editForm.saldo_contabil),
-        observacao: editForm.observacao, updated_at: new Date().toISOString(),
-      }).eq('id', editingAtivo.id);
-      if (updateError) throw updateError;
+        numero_bem: editForm.numero_bem,
+        numero_incorporacao: editForm.numero_incorporacao,
+        observacao: editForm.observacao, 
+        updated_at: new Date().toISOString(),
+      });
       setEditingAtivo(null);
       setSuccessMessage('Ativo atualizado com sucesso!');
       fetchAtivos();
@@ -264,8 +301,7 @@ function App() {
 
   const handleDeleteAtivo = async (id: string) => {
     try {
-      const { error: deleteError } = await supabase.from('ativos').delete().eq('id', id);
-      if (deleteError) throw deleteError;
+      await deleteDoc(doc(db, 'ativos', id));
       setDeletingId(null);
       setSuccessMessage('Ativo removido com sucesso!');
       fetchAtivos();
@@ -279,6 +315,7 @@ function App() {
       status: ativo.status, categoria: ativo.categoria || '', localizacao: ativo.localizacao || '',
       data_aquisicao: ativo.data_aquisicao || '', valor: ativo.valor?.toString() || '',
       depr_acum: ativo.depr_acum?.toString() || '', saldo_contabil: ativo.saldo_contabil?.toString() || '',
+      numero_bem: ativo.numero_bem || '', numero_incorporacao: ativo.numero_incorporacao || '',
       observacao: ativo.observacao || '',
     });
   };
@@ -365,27 +402,37 @@ function App() {
     };
 
     for (let i = 0; i < excelData.length; i += BATCH_SIZE) {
-      const batch = excelData.slice(i, i + BATCH_SIZE).map(row => ({
-        placa: String(row.placa || ''),
-        numero_loja: String(row.numero_loja || ''),
-        descricao: String(row.descricao || ''),
-        status: String(row.status || 'ativo'),
-        categoria: String(row.categoria || ''),
-        localizacao: String(row.localizacao || ''),
-        data_aquisicao: formatToPostgresDate(row.data_aquisicao),
-        valor: parseNumericValue(row.valor),
-        depr_acum: parseNumericValue(row.depr_acum),
-        saldo_contabil: parseNumericValue(row.saldo_contabil),
-        numero_bem: String(row.numero_bem || ''),
-        numero_incorporacao: String(row.numero_incorporacao || ''),
-        observacao: String(row.observacao || ''),
-      }));
-      const { error: insertError } = await supabase.from('ativos').insert(batch);
-      if (insertError) {
-        console.error('Erro ao inserir lote no Supabase:', insertError);
-        errorCount += batch.length;
+      try {
+        const batch = writeBatch(db);
+        const chunk = excelData.slice(i, i + BATCH_SIZE);
+        
+        chunk.forEach(row => {
+          const docRef = doc(collection(db, 'ativos'));
+          batch.set(docRef, {
+            placa: String(row.placa || ''),
+            numero_loja: String(row.numero_loja || ''),
+            descricao: String(row.descricao || ''),
+            status: String(row.status || 'ativo'),
+            categoria: String(row.categoria || ''),
+            localizacao: String(row.localizacao || ''),
+            data_aquisicao: formatToPostgresDate(row.data_aquisicao),
+            valor: parseNumericValue(row.valor),
+            depr_acum: parseNumericValue(row.depr_acum),
+            saldo_contabil: parseNumericValue(row.saldo_contabil),
+            numero_bem: String(row.numero_bem || ''),
+            numero_incorporacao: String(row.numero_incorporacao || ''),
+            observacao: String(row.observacao || ''),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          });
+        });
+        
+        await batch.commit();
+        successCount += chunk.length;
+      } catch (err) {
+        console.error('Erro ao inserir lote no Firebase:', err);
+        errorCount += chunk.length;
       }
-      else { successCount += batch.length; }
     }
     setImportResult({ success: successCount, errors: errorCount });
     setImporting(false);
@@ -450,12 +497,31 @@ function App() {
 
   const handleClearDatabase = async () => {
     if (!confirm('ATENCAO: Isso ira apagar TODOS os ativos do banco de dados. Deseja continuar?')) return;
+    setLoading(true);
     try {
-      const { error: deleteError } = await supabase.from('ativos').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      if (deleteError) throw deleteError;
+      const querySnapshot = await getDocs(collection(db, 'ativos'));
+      const batchSize = 500; // Limite do Firestore por lote
+      let batch = writeBatch(db);
+      let count = 0;
+
+      for (const snapshot of querySnapshot.docs) {
+        batch.delete(snapshot.ref);
+        count++;
+        if (count === batchSize) {
+          await batch.commit();
+          batch = writeBatch(db);
+          count = 0;
+        }
+      }
+      if (count > 0) await batch.commit();
+
       setSuccessMessage('Todos os ativos foram removidos do banco de dados.');
       fetchAtivos();
-    } catch (err) { setError(err instanceof Error ? err.message : 'Erro ao limpar banco de dados'); }
+    } catch (err) { 
+      setError(err instanceof Error ? err.message : 'Erro ao limpar banco de dados'); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
